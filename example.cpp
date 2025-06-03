@@ -21,21 +21,15 @@ int main(int argc, char** argv) {
 
         for (int x=0; x<img.width/2; x++){
             for (int y=0; y<img.width/2; y++) {
-                PixelRGB *pxl;
-                pxl = (PixelRGB*) img.at(x,y);
-                pxl->r = 125;
-                pxl->g = 0;
-                pxl->b = 0;
-
-                pxl = (PixelRGB*) img2.at(x,y);
-                pxl->r = 125;
-                pxl->g = 125;
-                pxl->b = 125;
+                ColorRGBA clr( *(PixelRGB*)img.at(x, y) );
+                double v = (clr.r + clr.g + clr.b)/3;
+                clr.r = v; clr.g = v; clr.b = v;
+                *(PixelRGB*)img.at(x, y) = (PixelRGB)clr;
             }
         }
 
         draw_line<PixelRGB>(img, 0, 0, img.width/2, img.height, PixelRGB{255, 0, 0}, 10);
-        add_line<PixelRGB>(img, 0, img.height/2, img.width, img.height/2, PixelRGB{0, 0, 255}, 10, 0.9);
+        add_line<PixelRGB>(img, 0, img.height/2, img.width, img.height/2, PixelRGB{0, 0, 255}, 10, 0.5);
 
         std::cout << "Image edited" << std::endl;
 

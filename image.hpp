@@ -5,6 +5,7 @@
 #include <iostream>
 #include <exception>
 #include <string>
+#include <assert.h>
 
 extern "C" {
     #include "stb/stb_image.h"
@@ -79,6 +80,32 @@ struct PixelRGBA: public PixelRGB {
     PixelRGBA& operator-=(const PixelRGBA& other);
 };
 PixelRGBA operator*(float k, PixelRGBA& pix);
+
+
+struct ColorRGBA {
+    double r, g, b;
+    double a = 1;
+
+    ColorRGBA(double r, double g, double b);
+    ColorRGBA(double r, double g, double b, double a);
+    ColorRGBA(const PixelRGB& rgb);
+    ColorRGBA(const PixelRGBA& rgba);
+
+    ColorRGBA operator*(double k);
+    ColorRGBA operator/(double k);
+
+    ColorRGBA operator+(const ColorRGBA& other);
+    ColorRGBA operator-(const ColorRGBA& other);
+
+    ColorRGBA& operator*=(double k);
+    ColorRGBA& operator+=(const ColorRGBA& other);
+    ColorRGBA& operator-=(const ColorRGBA& other);
+
+    explicit operator PixelRGB() const;
+    explicit operator PixelRGBA() const;
+};
+ColorRGBA operator*(double k, const ColorRGBA& pix);
+
 
 #endif //STB_IMAGE_WRAPPER_INCLUDE
 
@@ -407,4 +434,106 @@ PixelRGBA& PixelRGBA::operator-=(const PixelRGBA& other) {
     this->a = _a;
     return *this;
 }
+
+
+
+
+
+
+
+
+
+ColorRGBA::ColorRGBA(double r, double g, double b): r(r), g(g), b(b) {}
+ColorRGBA::ColorRGBA(double r, double g, double b, double a): r(r), g(g), b(b), a(a) {}
+ColorRGBA::ColorRGBA(const PixelRGB& rgb) {
+    this->r = (double)rgb.r / 255.0;
+    this->g = (double)rgb.g / 255.0;
+    this->b = (double)rgb.b / 255.0;
+}
+ColorRGBA::ColorRGBA(const PixelRGBA& rgba) {
+    this->r = (double)rgba.r / 255.0;
+    this->g = (double)rgba.g / 255.0;
+    this->b = (double)rgba.b / 255.0;
+    this->a = (double)rgba.a / 255.0;
+}
+
+ColorRGBA ColorRGBA::operator*(double k) {
+    return ColorRGBA(k*this->r, k*this->g, k*this->b, this->a);
+}
+
+ColorRGBA operator*(double k, const ColorRGBA& pix) {
+    return ColorRGBA(k*pix.r, k*pix.g, k*pix.b, pix.a);
+}
+
+ColorRGBA ColorRGBA::operator/(double k) {
+    return ColorRGBA(this->r/k, this->g/k, this->b/k, this->a);
+}
+
+ColorRGBA ColorRGBA::operator+(const ColorRGBA& other) {
+    return ColorRGBA(this->r + other.r, this->g + other.g, this->b + other.b, (this->a + other.a)/2);
+}
+ColorRGBA ColorRGBA::operator-(const ColorRGBA& other) {
+    return ColorRGBA(this->r - other.r, this->g - other.g, this->b - other.b, (this->a + other.a)/2);
+}
+
+ColorRGBA& ColorRGBA::operator*=(double k) {
+    this->r *= k;
+    this->g *= k;
+    this->b *= k;
+    return *this;
+}
+
+ColorRGBA& ColorRGBA::operator+=(const ColorRGBA& other) {
+    this->r += other.r;
+    this->g += other.g;
+    this->b += other.b;
+    return *this;
+}
+
+ColorRGBA& ColorRGBA::operator-=(const ColorRGBA& other) {
+    this->r -= other.r;
+    this->g -= other.g;
+    this->b -= other.b;
+    return *this;
+}
+
+ColorRGBA::operator PixelRGB() const  {
+    double _r = this->r;
+    double _g = this->g;
+    double _b = this->b;
+
+    if (_r < 0) _r = 0;
+    if (_r > 1) _r = 1;
+
+    if (_g < 0) _g = 0;
+    if (_g > 1) _g = 1;
+
+    if (_b < 0) _b = 0;
+    if (_b > 1) _b = 1;
+
+    return PixelRGB(255*_r, 255*_g, 255*_b);
+}
+
+ColorRGBA::operator PixelRGBA() const {
+    double _r = this->r;
+    double _g = this->g;
+    double _b = this->b;
+    double _a = this->a;
+
+    if (_r < 0) _r = 0;
+    if (_r > 1) _r = 1;
+
+    if (_g < 0) _g = 0;
+    if (_g > 1) _g = 1;
+
+    if (_b < 0) _b = 0;
+    if (_b > 1) _b = 1;
+
+    if (_a < 0) _a = 0;
+    if (_a > 1) _a = 1;
+
+    return PixelRGBA(255*_r, 255*_g, 255*_b, 255*_a);
+}
+
+
 #endif // STB_IMAGE_WRAPPER_IMPLEMENTATION
