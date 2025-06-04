@@ -218,9 +218,12 @@ void add_line(Image &img,
     
     float w = thickness * sqrt(1 + (gradient * gradient));
 
+    // float xend = round(x0);
+    // float yend = y0 + (w-1)/2 + gradient*(xend - x0);
+    // float xgap = rfpart(x0 + 0.5);
     float xend = round(x0);
-    float yend = y0 + (w-1)/2 + gradient*(xend - x0);
-    float xgap = rfpart(x0 + 0.5);
+    float yend = y0 - (w-1)/2 + gradient * (xend - x0);
+    float xgap = 1 - (x0 + 0.5 - xend);
     
     float xpxl1 = xend;
     float ypxl1 = (float) ( (int) (yend));
@@ -242,9 +245,12 @@ void add_line(Image &img,
     
     float intery = yend + gradient;
     
+    // xend = round(x1);
+    // yend = y1 + gradient * (xend - x1);
+    // xgap = fpart(x1 + 0.5);
     xend = round(x1);
-    yend = y1 + gradient * (xend - x1);
-    xgap = fpart(x1 + 0.5);
+    yend = y1 - (w-1)/2 + gradient * (xend - x1);
+    xgap = 1 - (x1 + 0.5 - xend);
     
     float xpxl2 = xend; //this will be used in the main loop
     float ypxl2 = (float)((int)(yend));
@@ -266,21 +272,21 @@ void add_line(Image &img,
     // main loop
     if (steep) {
         for (int x = xpxl1 + 1;  x <= xpxl2 - 1; x++) {
-            plot_add<ColorT>(img, ipart(intery), x, clr * rfpart(yend) * xgap, k);
+            plot_add<ColorT>(img, ipart(round(intery)), x, clr * rfpart(yend) * xgap, k);
             for (int i=1; i<w; i++) {
-                plot_add<ColorT>(img, ipart(intery)+i, x, clr * 1, k);
+                plot_add<ColorT>(img, ipart(round(intery))+i, x, clr * 1, k);
             }
-            plot_add<ColorT>(img, ipart(intery)+ipart(w), x, clr * fpart(yend) * xgap, k);
+            plot_add<ColorT>(img, ipart(round(intery))+ipart(w), x, clr * fpart(yend) * xgap, k);
             intery = intery + gradient;
         }
     }
     else {
         for (int x = xpxl1 + 1; x <= xpxl2 - 1; x++) {
-            plot_add<ColorT>(img, x, ipart(intery), clr * rfpart(yend) * xgap, k);
+            plot_add<ColorT>(img, x, ipart(round(intery)), clr * rfpart(yend) * xgap, k);
             for (int i=1; i<w; i++) {
-                plot_add<ColorT>(img, x, ipart(intery)+i, clr * 1, k);
+                plot_add<ColorT>(img, x, ipart(round(intery))+i, clr * 1, k);
             }
-            plot_add<ColorT>(img, x, ipart(intery)+ipart(w), clr * fpart(yend) * xgap, k);
+            plot_add<ColorT>(img, x, ipart(round(intery))+ipart(w), clr * fpart(yend) * xgap, k);
 
             intery = intery + gradient;
         }

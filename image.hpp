@@ -309,14 +309,13 @@ PixelRGBA PixelRGBA::operator*(float k) {
     return res;
 }
 
-
 PixelRGBA operator*(float k, PixelRGBA& pix) {
     PixelRGBA res(pix.r*k,pix.g*k,pix.b*k, pix.a);
     return res;
 }
 
-PixelRGBA operator/(float k, PixelRGBA& pix) {
-    PixelRGBA res(pix.r/k,pix.g/k,pix.b/k, pix.a);
+PixelRGBA PixelRGBA::operator/(float k) {
+    PixelRGBA res(this->r/k,this->g/k,this->b/k, this->a);
     return res;
 }
 
