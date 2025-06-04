@@ -4,7 +4,6 @@
 #include "image.hpp"
 #include <math.h>
 
-#endif // STB_IMAGE_WRAPPER_EDIT_INCLUDE
 
 template<class ColorT>
 inline void plot(Image &img, float x, float y, ColorT clr);
@@ -29,6 +28,25 @@ void add_line(Image &img,
     float k = 0.5
 );
 
+#endif // STB_IMAGE_WRAPPER_EDIT_INCLUDE
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 #ifdef STB_IMAGE_WRAPPER_EDIT_IMPLEMENTATION
 
 #define swap(xold,xnew) {   \
@@ -50,7 +68,7 @@ inline void plot(Image &img, float x, float y, ColorT clr) {
     int ix = (int)round(x);
     if (ix<0) ix = 0;
     else if (ix >= img.width) ix = img.width-1;
-
+    
     int iy = (int)round(y);
     if (iy<0) iy = 0;
     else if (iy >= img.height) iy = img.height-1;
@@ -64,7 +82,7 @@ inline void plot_add(Image &img, float x, float y, ColorT clr, float k) {
     int ix = (int)round(x);
     if (ix<0) ix = 0;
     else if (ix >= img.width) ix = img.width-1;
-
+    
     int iy = (int)round(y);
     if (iy<0) iy = 0;
     else if (iy >= img.height) iy = img.height-1;
@@ -81,7 +99,7 @@ void draw_line(Image &img,
     float thickness
 ) {
     bool steep = abs(y1-y0) > abs(x1 - x0); 
-
+    
     if (steep) {
         swap(x0, y0);
         swap(x1, y1);
@@ -100,7 +118,7 @@ void draw_line(Image &img,
     else            gradient = dy/dx;
     
     float w = thickness * sqrt(1 + (gradient * gradient));
-
+    
     float xend = round(x0);
     float yend = y0 + (w-1)/2 + gradient*(xend - x0);
     float xgap = rfpart(x0 + 0.5);
@@ -164,7 +182,7 @@ void draw_line(Image &img,
                 plot<ColorT>(img, x, ipart(intery)+i, clr * 1);
             }
             plot<ColorT>(img, x, ipart(intery)+ipart(w), clr * fpart(yend) * xgap);
-
+            
             intery = intery + gradient;
         }
     }
