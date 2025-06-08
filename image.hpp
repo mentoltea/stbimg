@@ -142,6 +142,7 @@ Image::Image(const char* filepath, int desired_number_of_channels): owner(STB) {
     if (!this->data) {
         throw std::runtime_error("Cannot load image " + std::string(filepath));
     }
+    this->channels = desired_number_of_channels;
 }
 
 Image::Image(const std::string &filepath, int desired_number_of_channels): owner(STB) {
@@ -149,6 +150,7 @@ Image::Image(const std::string &filepath, int desired_number_of_channels): owner
     if (!this->data) {
         throw std::runtime_error("Cannot load image " + filepath);
     }
+    this->channels = desired_number_of_channels;
 }
 
 Image::Image(int width, int height, int channels): owner(LOCAL) {
