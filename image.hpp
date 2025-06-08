@@ -51,6 +51,21 @@ class Image {
     const uint8_t* at(int x, int y) const;
 };
 
+struct PixelGray {
+    uint8_t value;
+    PixelGray(uint8_t value);
+
+    PixelGray operator*(float k);
+    PixelGray operator/(float k);
+
+    PixelGray operator+(const PixelGray& other);
+    PixelGray operator-(const PixelGray& other);
+
+    PixelGray& operator+=(const PixelGray& other);
+    PixelGray& operator-=(const PixelGray& other);
+};
+PixelGray operator*(float k, PixelGray& pix);
+std::ostream& operator<<(std::ostream& os, const PixelGray& p);
 
 struct PixelRGB {
     uint8_t r, g, b;
@@ -92,6 +107,7 @@ struct ColorRGBA {
     ColorRGBA();
     ColorRGBA(double r, double g, double b);
     ColorRGBA(double r, double g, double b, double a);
+    ColorRGBA(const PixelGray& p);
     ColorRGBA(const PixelRGB& rgb);
     ColorRGBA(const PixelRGBA& rgba);
 
@@ -105,6 +121,7 @@ struct ColorRGBA {
     ColorRGBA& operator+=(const ColorRGBA& other);
     ColorRGBA& operator-=(const ColorRGBA& other);
 
+    explicit operator PixelGray() const;
     explicit operator PixelRGB() const;
     explicit operator PixelRGBA() const;
 };
@@ -274,6 +291,67 @@ const uint8_t* Image::at(int x, int y) const {
     
     return this->data + (x + this->width * y) * this->channels;
 }
+
+
+
+
+
+PixelGray::PixelGray(uint8_t value): value(value) {}
+
+PixelGray PixelGray::operator*(float k) {
+    PixelGray res(this->value*k);
+    return res;
+}
+PixelGray operator*(float k, PixelGray& pix) {
+    PixelGray res(pix.value*k);
+    return res;
+}
+PixelGray PixelGray::operator/(float k) {
+    PixelGray res(this->value/k);
+    return res;
+}
+
+PixelGray PixelGray::operator+(const PixelGray& other) {
+    int _value = (int)this->value + (int)other.value;
+    if (_value > 255) _value = 255;
+    else if (_value < 0) _value = 0;
+
+    PixelGray res(_value);
+    return res;
+}
+PixelGray PixelGray::operator-(const PixelGray& other) {
+    int _value = (int)this->value - (int)other.value;
+    if (_value > 255) _value = 255;
+    else if (_value < 0) _value = 0;
+
+    PixelGray res(_value);
+    return res;
+}
+
+PixelGray& PixelGray::operator+=(const PixelGray& other) {
+    int _value = (int)this->value + (int)other.value;
+    if (_value > 255) _value = 255;
+    else if (_value < 0) _value = 0;
+
+    this->value = _value;
+    return *this;
+}
+PixelGray& PixelGray::operator-=(const PixelGray& other) {
+    int _value = (int)this->value - (int)other.value;
+    if (_value > 255) _value = 255;
+    else if (_value < 0) _value = 0;
+
+    this->value = _value;
+    return *this;
+}
+
+std::ostream& operator<<(std::ostream& os, const PixelGray& p) {
+    os << "{value: " << p.value <<  "}";
+    return os;
+}
+
+
+
 
 PixelRGB::PixelRGB(uint8_t r, uint8_t g, uint8_t b): r(r), g(g), b(b) {}
 
@@ -468,6 +546,11 @@ PixelRGBA& PixelRGBA::operator-=(const PixelRGBA& other) {
 ColorRGBA::ColorRGBA(): r(0), g(0), b(0) {}
 ColorRGBA::ColorRGBA(double r, double g, double b): r(r), g(g), b(b) {}
 ColorRGBA::ColorRGBA(double r, double g, double b, double a): r(r), g(g), b(b), a(a) {}
+ColorRGBA::ColorRGBA(const PixelGray& p) {
+    this->r = (double)p.value / 255.0;
+    this->g = (double)p.value / 255.0;
+    this->b = (double)p.value / 255.0;
+}
 ColorRGBA::ColorRGBA(const PixelRGB& rgb) {
     this->r = (double)rgb.r / 255.0;
     this->g = (double)rgb.g / 255.0;
@@ -523,6 +606,15 @@ ColorRGBA& ColorRGBA::operator-=(const ColorRGBA& other) {
     this->g -= other.g;
     this->b -= other.b;
     return *this;
+}
+
+ColorRGBA::operator PixelGray() const  {
+    double _value = (this->r + this->g + this->b)/3.0;
+
+    if (_value < 0) _value = 0;
+    if (_value > 1) _value = 1;
+
+    return PixelGray(255*_value);
 }
 
 ColorRGBA::operator PixelRGB() const  {
