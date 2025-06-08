@@ -6,6 +6,7 @@
 #include <exception>
 #include <string>
 #include <assert.h>
+#include <fstream>
 
 extern "C" {
     #include "stb/stb_image.h"
@@ -47,6 +48,7 @@ class Image {
     int save_png(const std::string &filepath);
     
     uint8_t* at(int x, int y);
+    const uint8_t* at(int x, int y) const;
 };
 
 
@@ -64,6 +66,7 @@ struct PixelRGB {
     PixelRGB& operator-=(const PixelRGB& other);
 };
 PixelRGB operator*(float k, PixelRGB& pix);
+std::ostream& operator<<(std::ostream& os, const PixelRGB& p);
 
 struct PixelRGBA: public PixelRGB {
     uint8_t a;
@@ -80,12 +83,13 @@ struct PixelRGBA: public PixelRGB {
     PixelRGBA& operator-=(const PixelRGBA& other);
 };
 PixelRGBA operator*(float k, PixelRGBA& pix);
-
+std::ostream& operator<<(std::ostream& os, const PixelRGBA& p);
 
 struct ColorRGBA {
     double r, g, b;
     double a = 1;
 
+    ColorRGBA();
     ColorRGBA(double r, double g, double b);
     ColorRGBA(double r, double g, double b, double a);
     ColorRGBA(const PixelRGB& rgb);
@@ -105,7 +109,7 @@ struct ColorRGBA {
     explicit operator PixelRGBA() const;
 };
 ColorRGBA operator*(double k, const ColorRGBA& pix);
-
+std::ostream& operator<<(std::ostream& os, const ColorRGBA& p);
 
 #endif //STB_IMAGE_WRAPPER_INCLUDE
 
@@ -262,7 +266,19 @@ uint8_t* Image::at(int x, int y) {
     return this->data + (x + this->width * y) * this->channels;
 }
 
+const uint8_t* Image::at(int x, int y) const {
+    if (x < 0 || x >= this->width) throw std::range_error("x is out of range: " + std::to_string(x));
+    if (y < 0 || y >= this->height) throw std::range_error("y is out of range: " + std::to_string(y));
+    
+    return this->data + (x + this->width * y) * this->channels;
+}
+
 PixelRGB::PixelRGB(uint8_t r, uint8_t g, uint8_t b): r(r), g(g), b(b) {}
+
+std::ostream& operator<<(std::ostream& os, const PixelRGB& p) {
+    os << "{r: " << (int) p.r << ", g: " << (int) p.g << ", b: " << (int) p.b << "}";
+    return os;
+}
 
 PixelRGB PixelRGB::operator*(float k) {
     PixelRGB res(this->r*k,this->g*k,this->b*k);
@@ -282,19 +298,24 @@ PixelRGB PixelRGB::operator/(float k) {
 
 PixelRGBA::PixelRGBA(uint8_t r, uint8_t g, uint8_t b, uint8_t a): PixelRGB(r, g, b), a(a) {}
 
+std::ostream& operator<<(std::ostream& os, const PixelRGBA& p) {
+    os << "{r: " << (int) p.r << ", g: " << (int) p.g << ", b: " << (int) p.b << ", a: " << (int) p.a << "}";
+    return os;
+}
+
+
 PixelRGBA PixelRGBA::operator*(float k) {
     PixelRGBA res(this->r*k,this->g*k,this->b*k, this->a);
     return res;
 }
-
 
 PixelRGBA operator*(float k, PixelRGBA& pix) {
     PixelRGBA res(pix.r*k,pix.g*k,pix.b*k, pix.a);
     return res;
 }
 
-PixelRGBA operator/(float k, PixelRGBA& pix) {
-    PixelRGBA res(pix.r/k,pix.g/k,pix.b/k, pix.a);
+PixelRGBA PixelRGBA::operator/(float k) {
+    PixelRGBA res(this->r/k,this->g/k,this->b/k, this->a);
     return res;
 }
 
@@ -442,7 +463,7 @@ PixelRGBA& PixelRGBA::operator-=(const PixelRGBA& other) {
 
 
 
-
+ColorRGBA::ColorRGBA(): r(0), g(0), b(0) {}
 ColorRGBA::ColorRGBA(double r, double g, double b): r(r), g(g), b(b) {}
 ColorRGBA::ColorRGBA(double r, double g, double b, double a): r(r), g(g), b(b), a(a) {}
 ColorRGBA::ColorRGBA(const PixelRGB& rgb) {
@@ -455,6 +476,11 @@ ColorRGBA::ColorRGBA(const PixelRGBA& rgba) {
     this->g = (double)rgba.g / 255.0;
     this->b = (double)rgba.b / 255.0;
     this->a = (double)rgba.a / 255.0;
+}
+
+std::ostream& operator<<(std::ostream& os, const ColorRGBA& c) {
+    os << "{r: " << c.r << ", g: " << c.g << ", b: " << c.b << ", a: " << c.a << "}";
+    return os;
 }
 
 ColorRGBA ColorRGBA::operator*(double k) {
