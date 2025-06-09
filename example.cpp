@@ -29,7 +29,7 @@ int main(int argc, char** argv) {
         }
 
         draw_line<PixelRGB>(img, 0, 0, img.width/2, img.height, PixelRGB{255, 0, 0}, 10);
-        add_line<PixelRGB>(img, 0, img.height/2, img.width, img.height/2, PixelRGB{0, 0, 255}, 10, 0.5);
+        add_line_edge<PixelRGB>(img, 0, img.height/2, img.width, img.height/2, PixelRGB{0, 0, 255}, 10, 0.5);
 
         std::cout << "Image edited" << std::endl;
 
