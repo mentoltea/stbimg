@@ -701,7 +701,7 @@ ColorRGBA::operator ColorYCbCrA() const {
 
 
 double ColorYCbCrA::Kr = 0.299;
-double ColorYCbCrA::Kb = 0.587;
+double ColorYCbCrA::Kb = 0.114;
 ColorYCbCrA::ColorYCbCrA(): y(0), cb(0), cr(0) {}
 ColorYCbCrA::ColorYCbCrA(double y, double cb, double cr): y(y), cb(cb), cr(cr) {}
 ColorYCbCrA::ColorYCbCrA(double y, double cb, double cr, double a): y(y), cb(cb), cr(cr), a(a) {}

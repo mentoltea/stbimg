@@ -39,7 +39,7 @@ int main(int argc, char** argv) {
                 // ycbcra.y = 0;
                 // ycbcra.cb *= 0.4;
                 ycbcra.cb = 0;
-                ycbcra.cr = 0;
+                // ycbcra.cr = 0;
                 ColorRGBA final_clr = ycbcra;
                 *(PixelRGB*)img2.at(x, y) = (PixelRGB)final_clr;
             }

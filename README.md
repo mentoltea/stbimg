@@ -41,6 +41,16 @@ Also, in difference of discussed pixel structures, `ColorRGBA` is normalized (al
 
 When casting back to specified pixel structure, it automatically maps it's values to [0,255] considering probable over&under-flow.
 
+There is built-in conversion from `ColorRGBA` to `ColorYCbCrA` with **modifiable** `Kr` and `Kb` gamma-correction values. By default they are set to _CCIR 601_ standart (`Kr = 0.299` and `Kb = 0.114`). More about color conversions read [here](https://en.wikipedia.org/wiki/YCbCr).
+
+Since they are global (static class members), their change will affect all conversions - to keep in mind and not change them in the middle of conversions:
+rgb -> ycbcr -> [sudden change] -> rgb (incorrect)
+
+`ColorYCbCrA` values are mapping:
+y, cb, cr => [-0.5, 0.5]
+a => [0, 1]
+
+
 Some more usefull (but not so essential) functions of image processing can be found in example [here](https://github.com/mentoltea/gausian-blur-cpp).
 
 ---
