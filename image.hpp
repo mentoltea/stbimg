@@ -100,6 +100,9 @@ struct PixelRGBA: public PixelRGB {
 PixelRGBA operator*(float k, PixelRGBA& pix);
 std::ostream& operator<<(std::ostream& os, const PixelRGBA& p);
 
+struct ColorRGBA;
+struct ColorYCbCrA; 
+
 struct ColorRGBA {
     double r, g, b;
     double a = 1;
@@ -110,6 +113,7 @@ struct ColorRGBA {
     ColorRGBA(const PixelGray& p);
     ColorRGBA(const PixelRGB& rgb);
     ColorRGBA(const PixelRGBA& rgba);
+    ColorRGBA(const ColorYCbCrA& ycbcra);
 
     ColorRGBA operator*(double k);
     ColorRGBA operator/(double k);
@@ -124,9 +128,39 @@ struct ColorRGBA {
     explicit operator PixelGray() const;
     explicit operator PixelRGB() const;
     explicit operator PixelRGBA() const;
+
+    explicit operator ColorYCbCrA() const;
 };
 ColorRGBA operator*(double k, const ColorRGBA& pix);
 std::ostream& operator<<(std::ostream& os, const ColorRGBA& p);
+
+struct ColorYCbCrA {
+    // Kr & Kb MAY! be edited, and it will affect forward and backward conversions
+    static double Kr; 
+    static double Kb;
+
+    double y, cb, cr;
+    double a = 1;
+
+    ColorYCbCrA();
+    ColorYCbCrA(double y, double cb, double cr);
+    ColorYCbCrA(double y, double cb, double cr, double a);
+    ColorYCbCrA(const ColorRGBA& clr);
+
+    ColorYCbCrA operator*(double k);
+    ColorYCbCrA operator/(double k);
+
+    ColorYCbCrA operator+(const ColorYCbCrA& other);
+    ColorYCbCrA operator-(const ColorYCbCrA& other);
+
+    ColorYCbCrA& operator*=(double k);
+    ColorYCbCrA& operator+=(const ColorYCbCrA& other);
+    ColorYCbCrA& operator-=(const ColorYCbCrA& other);
+
+    explicit operator ColorRGBA() const;
+};
+ColorYCbCrA operator*(double k, const ColorYCbCrA& pix);
+std::ostream& operator<<(std::ostream& os, const ColorYCbCrA& p);
 
 #endif //STB_IMAGE_WRAPPER_INCLUDE
 
@@ -562,6 +596,12 @@ ColorRGBA::ColorRGBA(const PixelRGBA& rgba) {
     this->b = (double)rgba.b / 255.0;
     this->a = (double)rgba.a / 255.0;
 }
+ColorRGBA::ColorRGBA(const ColorYCbCrA& ycbcra) {
+    r = ycbcra.y + 2*(1-ColorYCbCrA::Kr)*(ycbcra.cr);
+    b = ycbcra.y + 2*(1-ColorYCbCrA::Kb)*(ycbcra.cb);
+
+    g = (ycbcra.y - ColorYCbCrA::Kr*r - ColorYCbCrA::Kb*b)/(1 - ColorYCbCrA::Kr - ColorYCbCrA::Kb);
+}
 
 std::ostream& operator<<(std::ostream& os, const ColorRGBA& c) {
     os << "{r: " << c.r << ", g: " << c.g << ", b: " << c.b << ", a: " << c.a << "}";
@@ -653,6 +693,68 @@ ColorRGBA::operator PixelRGBA() const {
     if (_a > 1) _a = 1;
 
     return PixelRGBA(255*_r, 255*_g, 255*_b, 255*_a);
+}
+
+ColorRGBA::operator ColorYCbCrA() const {
+    return ColorYCbCrA(*this);
+}
+
+
+double ColorYCbCrA::Kr = 0.299;
+double ColorYCbCrA::Kb = 0.587;
+ColorYCbCrA::ColorYCbCrA(): y(0), cb(0), cr(0) {}
+ColorYCbCrA::ColorYCbCrA(double y, double cb, double cr): y(y), cb(cb), cr(cr) {}
+ColorYCbCrA::ColorYCbCrA(double y, double cb, double cr, double a): y(y), cb(cb), cr(cr), a(a) {}
+ColorYCbCrA::ColorYCbCrA(const ColorRGBA& clr) {
+    y = Kr*clr.r + (1-Kr-Kb)*clr.g + Kb*clr.b;
+    cb = (clr.b - y)/(2*(1 - Kb));
+    cr = (clr.r - y)/(2*(1 - Kr));
+}
+
+ColorYCbCrA ColorYCbCrA::operator*(double k) {
+    return ColorYCbCrA(y*k, cb*k, cr*k, a);
+}
+ColorYCbCrA ColorYCbCrA::operator/(double k) {
+    return ColorYCbCrA(y/k, cb/k, cr/k, a);
+}
+
+ColorYCbCrA ColorYCbCrA::operator+(const ColorYCbCrA& other) {
+    return ColorYCbCrA(this->y+other.y, this->cb+other.cb, this->cr+other.cr, (this->a+other.a)/2.0);
+}
+ColorYCbCrA ColorYCbCrA::operator-(const ColorYCbCrA& other) {
+    return ColorYCbCrA(this->y-other.y, this->cb-other.cb, this->cr-other.cr, (this->a+other.a)/2.0);
+}
+
+ColorYCbCrA& ColorYCbCrA::operator*=(double k) {
+    this->y *= k;
+    this->cb *= k;
+    this->cr *= k;
+    return *this;
+}
+
+ColorYCbCrA& ColorYCbCrA::operator+=(const ColorYCbCrA& other) {
+    this->y += other.y;
+    this->cb += other.cb;
+    this->cr += other.cr;
+    return *this;
+}
+ColorYCbCrA& ColorYCbCrA::operator-=(const ColorYCbCrA& other) {
+    this->y -= other.y;
+    this->cb -= other.cb;
+    this->cr -= other.cr;
+    return *this;
+}
+
+ColorYCbCrA::operator ColorRGBA() const {
+    return ColorRGBA(*this);
+}
+
+ColorYCbCrA operator*(double k, const ColorYCbCrA& pix) {
+    return ColorYCbCrA(pix.y*k, pix.cb*k, pix.cr*k, pix.a);
+}
+std::ostream& operator<<(std::ostream& os, const ColorYCbCrA& p) {
+    os << "{Y: " << p.y << ", Cb: " << p.cb << ", Cr: " << p.cr << ", A: " << p.a << "}";
+    return os;
 }
 
 
