@@ -46,9 +46,9 @@ There is built-in conversion from `ColorRGBA` to `ColorYCbCrA` with **modifiable
 Since they are global (static class members), their change will affect all conversions - to keep in mind and not change them in the middle of conversions:
 rgb -> ycbcr -> [sudden change] -> rgb (incorrect)
 
-`ColorYCbCrA` values are mapping:
-y, cb, cr => [-0.5, 0.5]
-a => [0, 1]
+`ColorYCbCrA` values are mapping:  
+y, cb, cr => [-0.5, 0.5]  
+a => [0, 1]  
 
 
 Some more usefull (but not so essential) functions of image processing can be found in example [here](https://github.com/mentoltea/gausian-blur-cpp).
